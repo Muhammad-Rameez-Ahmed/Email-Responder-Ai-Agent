@@ -1,0 +1,273 @@
+{
+  "name": "Email Responder Ai Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        -48
+      ],
+      "id": "184d74ba-010f-4f6d-bc2c-b06409f2772e",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VHamEtG9H7Ae8XRE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Sponsorship",
+              "description": "A sponsorship email is a formal message sent to request financial or in-kind support from a company, brand, or organization for an event, project, or campaign. These emails typically include:  A brief introduction to the sender or organization  Details about the event or initiative  A clear sponsorship request  The benefits the sponsor will receive (e.g. brand visibility, recognition)  Contact or follow-up information  Common phrases include:  \"We are looking for sponsors for our event...\"  \"Would you be interested in partnering with us?\"  \"Please find our sponsorship proposal attached.\"  \"Your brand will gain exposure to a large audience...\"  These emails are often professional and persuasive, aiming to create a mutually beneficial partnership."
+            },
+            {
+              "category": "High Priority",
+              "description": "High priority email  often include word like urgent ,time deadline,or smililar"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        -48
+      ],
+      "id": "37ee988b-197b-4ea0-a15e-b159ee407263",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -176,
+        160
+      ],
+      "id": "faeba311-b338-491d-b7d7-49b59c932faf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "rmEMcfPmtCzP8SGh",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an assistant of Software Engineer Rameez Ahmed\n\nyour job is to respond to the email below\n\nThis email is related to sponsorship opportunities. It may include requests for funding, offers for brand collaboration, event sponsorships, or partnership proposals. These emails typically mention keywords like sponsorship, funding, support, collaboration, partner, event, or contribution, and may include details about costs, benefits, audience reach, or visibility\n\nThe email is respond to is:  {{ $('Gmail Trigger').item.json.text }}",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        240,
+        -192
+      ],
+      "id": "75f8ce14-2b0d-47ed-b94f-2c0e906a5580",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vGY42EnL7iT1E6dp",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=\n\n{{ $json.message.content.response.greeting }}",
+        "message": "={{ $json.message.content.response.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        -192
+      ],
+      "id": "a974e4e9-b925-4d8a-889d-730a8f5d858a",
+      "name": "Create a draft",
+      "webhookId": "e06becbc-a946-4622-882d-cdf30d40c1e4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VHamEtG9H7Ae8XRE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an assistant , your job is to respond to the following high priority email as good as you can \n\n {{ $json.text }}",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        256,
+        48
+      ],
+      "id": "4960bd86-1d8b-4526-bdc5-aa91e6f66ea0",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "rmEMcfPmtCzP8SGh",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.message.content.response.subject }}",
+        "message": "={{ $json.message.content.response.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        48
+      ],
+      "id": "818e724f-b567-4b07-a882-2f1e95b61766",
+      "name": "Create a draft1",
+      "webhookId": "4bf04666-1143-4cdf-976d-e0744ee197a3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VHamEtG9H7Ae8XRE",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Create a draft1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8fe2c984-da0d-4a4c-ac71-f5bf3bac251d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1711f2e0c3ab4d75babde294b80424a261243ea431311e5bbb2ff10ce9a9fa94"
+  },
+  "id": "UxGaubYaArrsecr6",
+  "tags": []
+}
